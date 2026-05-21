@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linky — Your Link in Bio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080810;--bg2:#0f0f1a;--bg3:#16162a;--bg4:#1e1e35;
+  --acc:#7c5cfc;--acc2:#a78bfa;--acc3:#c4b5fd;
+  --pink:#f472b6;--cyan:#22d3ee;
+  --text:#f0eeff;--muted:#6b7280;--border:#1e1e35;
+  --green:#4ade80;--red:#f87171;--yellow:#fbbf24;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--acc);border-radius:2px}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+
+/* ═══════════════════════════════════════════════
+   LANDING
+═══════════════════════════════════════════════ */
+#screen-landing{
+  flex-direction:column;align-items:center;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,#3b1fa820,transparent),var(--bg);
+}
+
+/* Nav */
+.nav{
+  width:100%;max-width:1100px;padding:24px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;z-index:10;
+}
+.logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;
+  background:linear-gradient(135deg,var(--acc2),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btns{display:flex;gap:10px}
+
+/* Hero */
+.hero{
+  max-width:820px;text-align:center;padding:80px 24px 60px;
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(124,92,252,0.12);border:1px solid rgba(124,92,252,0.3);
+  border-radius:100px;padding:6px 16px;
+  font-size:0.78rem;color:var(--acc3);letter-spacing:0.05em;
+}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--acc);
+  box-shadow:0 0 6px var(--acc);animation:pulse 2s infinite}
+.hero h1{
+  font-family:'Syne',sans-serif;font-size:clamp(2.8rem,7vw,5rem);
+  font-weight:800;line-height:1.05;letter-spacing:-0.02em;
+}
+.hero h1 em{font-style:normal;
+  background:linear-gradient(135deg,var(--acc2),var(--pink) 60%,var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.1rem;color:var(--muted);max-width:520px;line-height:1.7}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+
+/* Features */
+.features{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:16px;max-width:1000px;padding:0 24px 80px;width:100%;
+}
+@media(max-width:700px){.features{grid-template-columns:1fr}}
+.feat{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:28px;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.feat:hover{border-color:rgba(124,92,252,0.4);transform:translateY(-2px)}
+.feat-icon{font-size:1.8rem;margin-bottom:14px}
+.feat h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:6px}
+.feat p{font-size:0.83rem;color:var(--muted);line-height:1.6}
+
+/* Stats bar */
+.stats-bar{
+  display:flex;gap:48px;padding:32px 24px;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  width:100%;justify-content:center;margin-bottom:60px;
+}
+.stat-item{text-align:center}
+.stat-item .num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;
+  background:linear-gradient(135deg,var(--acc2),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-item .lbl{font-size:0.75rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px}
+
+/* ═══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+#screen-auth{
+  align-items:center;justify-content:center;
+  background:radial-gradient(ellipse 60% 50% at 30% 50%,#3b1fa815,transparent),var(--bg);
+}
+.auth-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:24px;padding:48px 40px;width:100%;max-width:420px;
+  position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,var(--acc) 0%,transparent 70%);
+  opacity:0.07;
+}
+.auth-logo{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;
+  background:linear-gradient(135deg,var(--acc2),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:8px}
+.auth-sub{font-size:0.85rem;color:var(--muted);margin-bottom:32px}
+.auth-tabs{display:flex;gap:0;margin-bottom:28px;
+  background:var(--bg3);border-radius:10px;padding:4px}
+.auth-tab{flex:1;padding:8px;text-align:center;font-size:0.85rem;
+  border-radius:7px;cursor:pointer;transition:background 0.2s,color 0.2s;color:var(--muted)}
+.auth-tab.active{background:var(--acc);color:white;font-weight:500}
+
+/* ═══════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════ */
+#screen-dashboard{flex-direction:row}
+.sidebar{
+  width:240px;min-height:100vh;background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:24px 16px;
+  flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar-logo{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;
+  background:linear-gradient(135deg,var(--acc2),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  padding:0 8px;margin-bottom:28px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:10px;cursor:pointer;font-size:0.88rem;
+  color:var(--muted);transition:all 0.15s;margin-bottom:2px;
+  border:none;background:none;width:100%;text-align:left;
+}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(124,92,252,0.15);color:var(--acc3)}
+.nav-item .icon{font-size:1rem;width:20px;text-align:center}
+.sidebar-bottom{margin-top:auto}
+.user-pill{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--bg3);border-radius:10px;cursor:pointer;
+  border:1px solid var(--border);
+}
+.user-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--acc),var(--pink));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:700;color:white;flex-shrink:0;
+}
+.user-name{font-size:0.82rem;font-weight:500;flex:1;truncate:true;overflow:hidden;white-space:nowrap}
+.user-handle{font-size:0.72rem;color:var(--muted)}
+
+.dash-main{flex:1;padding:32px;overflow-y:auto;max-height:100vh}
+.dash-panel{display:none}
+.dash-panel.active{display:block}
+.dash-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:24px}
+
+/* ── KPI ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.kpi-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:20px;position:relative;overflow:hidden;
+}
+.kpi-card::after{content:'';position:absolute;top:0;right:0;
+  width:60px;height:60px;border-radius:50%;
+  background:radial-gradient(circle,var(--acc),transparent 70%);opacity:0.06}
+.kpi-lbl{font-size:0.72rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+.kpi-val{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:700}
+.kpi-sub{font-size:0.72rem;color:var(--muted);margin-top:4px}
+
+/* ── LINK EDITOR ── */
+.link-editor-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.link-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.link-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;
+  cursor:grab;transition:border-color 0.15s;
+}
+.link-item:hover{border-color:rgba(124,92,252,0.4)}
+.link-drag{color:var(--muted);cursor:grab;font-size:0.85rem;padding:0 4px}
+.link-icon-sel{font-size:1.2rem;width:32px;text-align:center;flex-shrink:0}
+.link-details{flex:1;min-width:0}
+.link-title-inp,.link-url-inp{
+  width:100%;background:transparent;border:none;outline:none;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+  padding:2px 0;
+}
+.link-title-inp{font-weight:500;margin-bottom:2px}
+.link-url-inp{color:var(--muted);font-size:0.78rem}
+.link-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;
+  padding:4px;border-radius:6px;transition:color 0.15s,background 0.15s}
+.link-del:hover{color:var(--red);background:rgba(248,113,113,0.1)}
+
+/* ── PROFILE EDITOR ── */
+.profile-wrap{display:grid;grid-template-columns:1fr 300px;gap:20px}
+@media(max-width:800px){.profile-wrap{grid-template-columns:1fr}}
+.profile-form{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px}
+.profile-preview{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;
+  display:flex;flex-direction:column;align-items:center;text-align:center}
+
+/* ── ANALYTICS ── */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.analytics-grid{grid-template-columns:1fr}}
+.ana-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:22px}
+.ana-title{font-size:0.75rem;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px}
+
+/* ── PUBLIC PAGE PREVIEW ── */
+.pub-preview{
+  background:var(--bg3);border:1px solid var(--border);border-radius:16px;
+  padding:24px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  min-height:300px;
+}
+.pub-avatar{width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--acc),var(--pink));
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.pub-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem}
+.pub-bio{font-size:0.8rem;color:var(--muted);text-align:center;max-width:220px}
+.pub-link-btn{
+  width:100%;max-width:260px;background:var(--bg4);border:1px solid var(--border);
+  border-radius:10px;padding:11px 16px;
+  display:flex;align-items:center;gap:10px;
+  font-size:0.82rem;color:var(--text);text-decoration:none;
+  transition:border-color 0.2s,transform 0.15s;
+}
+.pub-link-btn:hover{border-color:var(--acc);transform:translateY(-1px)}
+
+/* ── THEMES ── */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.theme-opt{
+  aspect-ratio:1;border-radius:12px;cursor:pointer;
+  border:2px solid transparent;transition:border-color 0.15s,transform 0.15s;
+  position:relative;overflow:hidden;
+}
+.theme-opt.selected,.theme-opt:hover{border-color:var(--acc);transform:scale(1.04)}
+.theme-opt::after{content:'✓';position:absolute;bottom:4px;right:6px;
+  font-size:0.7rem;color:white;opacity:0;transition:opacity 0.15s}
+.theme-opt.selected::after{opacity:1}
+
+/* ── SHARED COMPONENTS ── */
+.inp{
+  width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;
+  outline:none;transition:border-color 0.2s;
+}
+.inp:focus{border-color:var(--acc)}
+.inp::placeholder{color:var(--muted)}
+label{display:block;font-size:0.78rem;color:var(--muted);margin-bottom:6px;letter-spacing:0.04em}
+.field{margin-bottom:16px}
+
+.btn{
+  padding:11px 22px;border-radius:10px;font-family:'DM Sans',sans-serif;
+  font-size:0.88rem;font-weight:500;cursor:pointer;border:none;
+  transition:all 0.15s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--acc);color:white}
+.btn-primary:hover{background:var(--acc2)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--acc);color:var(--acc3)}
+.btn-danger{background:transparent;border:1px solid var(--border);color:var(--red)}
+.btn-danger:hover{background:rgba(248,113,113,0.1);border-color:var(--red)}
+.btn-sm{padding:7px 14px;font-size:0.8rem}
+.btn-full{width:100%;justify-content:center}
+
+.section-title{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;
+  color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:500}
+.badge-green{background:rgba(74,222,128,0.12);color:var(--green)}
+.badge-acc{background:rgba(124,92,252,0.15);color:var(--acc3)}
+.badge-red{background:rgba(248,113,113,0.12);color:var(--red)}
+
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--bg3);border:1px solid var(--border);border-radius:12px;
+  padding:14px 20px;font-size:0.85rem;
+  transform:translateY(80px);opacity:0;transition:all 0.3s;
+  display:flex;align-items:center;gap:10px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+.link-row{
+  width:100%;padding:24px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.4s ease both}
+
+/* Country list */
+.clist{display:flex;flex-direction:column;gap:8px}
+.crow{display:flex;align-items:center;gap:8px;font-size:0.82rem}
+.cbar-w{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.cbar{height:100%;background:linear-gradient(90deg,var(--acc),var(--pink));border-radius:2px;transition:width 0.8s ease}
+.cnum{color:var(--muted);font-size:0.75rem;width:28px;text-align:right}
+
+/* Events log */
+.elog{display:flex;flex-direction:column;gap:4px}
+.erow{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:0.78rem}
+.erow:hover{background:var(--bg3)}
+
+/* Mobile sidebar toggle */
+.mobile-menu-btn{display:none;position:fixed;bottom:20px;right:20px;z-index:100;
+  width:48px;height:48px;border-radius:50%;background:var(--acc);
+  border:none;color:white;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 20px rgba(124,92,252,0.4)}
+@media(max-width:768px){
+  .mobile-menu-btn{display:flex;align-items:center;justify-content:center}
+  .sidebar{position:fixed;left:-260px;top:0;z-index:50;transition:left 0.3s}
+  .sidebar.open{left:0}
+  .dash-main{padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LANDING ═══════════════ -->
+<div id="screen-landing" class="screen active">
+  <nav class="nav">
+    <div class="logo">Linky ✦</div>
+    <div class="nav-btns">
+      <button class="btn btn-ghost btn-sm" onclick="showAuth('login')">Log in</button>
+      <button class="btn btn-primary btn-sm" onclick="showAuth('signup')">Get started →</button>
+    </div>
+  </nav>
+
+  <div class="hero fade-in">
+    <div class="hero-badge"><span></span> 100% free · no credit card</div>
+    <h1>Your links.<br><em>One page.</em><br>Everywhere.</h1>
+    <p>Create your personal link page in 60 seconds. Share it on Instagram, TikTok, YouTube — one link for all your content.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="showAuth('signup')" style="padding:14px 28px;font-size:1rem">
+        Create your page →
+      </button>
+      <button class="btn btn-ghost" onclick="showAuth('login')" style="padding:14px 24px">
+        Log in
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item"><div class="num">10K+</div><div class="lbl">Users</div></div>
+    <div class="stat-item"><div class="num">50K+</div><div class="lbl">Links created</div></div>
+    <div class="stat-item"><div class="num">1M+</div><div class="lbl">Clicks tracked</div></div>
+    <div class="stat-item"><div class="num">Free</div><div class="lbl">Forever</div></div>
+  </div>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <h3>Ready in 60 seconds</h3>
+      <p>Sign up, add your links, share. No design skills needed, works perfectly on mobile.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">📊</div>
+      <h3>Real analytics</h3>
+      <p>See who visits your page, what they click, where they're from — updated in real time.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🎨</div>
+      <h3>Beautiful themes</h3>
+      <p>Choose from dozens of themes and customize colors to match your personal brand.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🌍</div>
+      <h3>Global reach</h3>
+      <p>Your page loads fast everywhere. We track visitor countries so you know your audience.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔗</div>
+      <h3>Unlimited links</h3>
+      <p>Add OnlyFans, Instagram, Telegram, YouTube, your shop — as many links as you need.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔒</div>
+      <h3>Private dashboard</h3>
+      <p>Your analytics are yours only. Visitors see just your beautiful link page.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ AUTH ═══════════════ -->
+<div id="screen-auth" class="screen">
+  <div class="auth-card fade-in">
+    <div class="auth-logo">Linky ✦</div>
+    <div class="auth-sub" id="auth-subtitle">Create your free account</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-signup" onclick="switchTab('signup')">Sign up</div>
+      <div class="auth-tab" id="tab-login" onclick="switchTab('login')">Log in</div>
+    </div>
+
+    <div id="form-signup">
+      <div class="field">
+        <label>Your username (your page will be /u/username)</label>
+        <input class="inp" id="su-username" placeholder="katrin" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="inp" id="su-email" type="email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="inp" id="su-password" type="password" placeholder="Min 6 characters">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doSignup()">Create account →</button>
+    </div>
+
+    <div id="form-login" style="display:none">
+      <div class="field">
+        <label>Email</label>
+        <input class="inp" id="li-email" type="email" placeholder="you@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="inp" id="li-password" type="password" placeholder="Your password">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Log in →</button>
+    </div>
+
+    <div id="auth-err" style="color:var(--red);font-size:0.8rem;margin-top:12px;display:none"></div>
+    <div style="margin-top:16px;text-align:center">
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('landing')" style="font-size:0.78rem;color:var(--muted)">← Back to home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div id="screen-dashboard" class="screen">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Linky ✦</div>
+    <button class="nav-item active" id="nav-overview"  onclick="showPanel('overview')"> <span class="icon">📊</span> Overview</button>
+    <button class="nav-item"        id="nav-links"     onclick="showPanel('links')">    <span class="icon">🔗</span> My Links</button>
+    <button class="nav-item"        id="nav-profile"   onclick="showPanel('profile')">  <span class="icon">✨</span> Profile</button>
+    <button class="nav-item"        id="nav-analytics" onclick="showPanel('analytics')"><span class="icon">📈</span> Analytics</button>
+    <button class="nav-item"        id="nav-share"     onclick="showPanel('share')">    <span class="icon">🔗</span> Share</button>
+    <div style="flex:1"></div>
+    <div class="sidebar-bottom">
+      <div class="user-pill" onclick="showPanel('profile')">
+        <div class="user-avatar" id="sidebar-avatar">K</div>
+        <div><div class="user-name" id="sidebar-name">Loading...</div>
+          <div class="user-handle" id="sidebar-handle">@...</div></div>
+      </div>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;font-size:0.8rem;color:var(--muted)" onclick="doLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="dash-main">
+
+    <!-- Overview panel -->
+    <div class="dash-panel active" id="panel-overview">
+      <div class="dash-title">Overview 👋</div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-lbl">Total visits</div><div class="kpi-val" id="ov-visits">—</div><div class="kpi-sub">all time</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Today</div><div class="kpi-val" id="ov-today">—</div><div class="kpi-sub">unique visits</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Total clicks</div><div class="kpi-val" id="ov-clicks">—</div><div class="kpi-sub">on your links</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Conversion</div><div class="kpi-val" id="ov-conv">—</div><div class="kpi-sub">clicks / visits</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="ana-card">
+          <div class="ana-title">🌍 Top countries</div>
+          <div class="clist" id="ov-countries"><div style="color:var(--muted);font-size:0.82rem">No data yet</div></div>
+        </div>
+        <div class="ana-card">
+          <div class="ana-title">🔗 Top links</div>
+          <div id="ov-top-links"><div style="color:var(--muted);font-size:0.82rem">No clicks yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Links panel -->
+    <div class="dash-panel" id="panel-links">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <div class="dash-title" style="margin:0">My Links 🔗</div>
+        <button class="btn btn-primary btn-sm" onclick="addLink()">+ Add link</button>
+      </div>
+      <div class="link-editor-wrap">
+        <div class="link-list" id="link-list">
+          <div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">Loading your links...</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="addLink()">+ Add another link</button>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="saveLinks()">💾 Save links</button>
+        <a id="preview-link" href="#" target="_blank" class="btn btn-ghost">👁 Preview page</a>
+      </div>
+    </div>
+
+    <!-- Profile panel -->
+    <div class="dash-panel" id="panel-profile">
+      <div class="dash-title">Profile ✨</div>
+      <div class="profile-wrap">
+        <div class="profile-form">
+          <div class="section-title">Basic info</div>
+          <div class="field"><label>Display name</label><input class="inp" id="p-name" placeholder="Katrin"></div>
+          <div class="field"><label>Username (page URL)</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="color:var(--muted);font-size:0.85rem;white-space:nowrap">linky.app/u/</span>
+              <input class="inp" id="p-username" placeholder="katrin" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+            </div>
+          </div>
+          <div class="field"><label>Bio</label><textarea class="inp" id="p-bio" rows="2" placeholder="content creator · model 🌸"></textarea></div>
+          <div class="field"><label>Avatar emoji</label><input class="inp" id="p-avatar" placeholder="🌸" style="width:80px"></div>
+          <div class="divider"></div>
+          <div class="section-title">Theme</div>
+          <div class="theme-grid" id="theme-grid"></div>
+          <div class="divider"></div>
+          <button class="btn btn-primary" onclick="saveProfile()">💾 Save profile</button>
+        </div>
+        <div>
+          <div class="section-title" style="margin-bottom:12px">Preview</div>
+          <div class="pub-preview" id="profile-preview">
+            <div class="pub-avatar" id="prev-avatar">🌸</div>
+            <div class="pub-name" id="prev-name">Your Name</div>
+            <div class="pub-bio" id="prev-bio">Your bio here</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics panel -->
+    <div class="dash-panel" id="panel-analytics">
+      <div class="dash-title">Analytics 📈</div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-lbl">Total visits</div><div class="kpi-val" id="an-visits">—</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Today</div><div class="kpi-val" id="an-today">—</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Clicks</div><div class="kpi-val" id="an-clicks">—</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Countries</div><div class="kpi-val" id="an-countries">—</div></div>
+      </div>
+      <div class="analytics-grid">
+        <div class="ana-card">
+          <div class="ana-title">🌍 Visitors by country</div>
+          <div class="clist" id="an-country-list"></div>
+        </div>
+        <div class="ana-card">
+          <div class="ana-title">🔗 Clicks by link</div>
+          <div id="an-clicks-list"></div>
+        </div>
+        <div class="ana-card" style="grid-column:1/-1">
+          <div class="ana-title">📋 Recent events (last 50)</div>
+          <div class="elog" id="an-events"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share panel -->
+    <div class="dash-panel" id="panel-share">
+      <div class="dash-title">Share your page 🔗</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:500px">
+        <div class="section-title">Your page URL</div>
+        <div style="display:flex;gap:10px;margin-bottom:24px;align-items:center">
+          <input class="inp" id="share-url" readonly style="font-family:monospace;font-size:0.85rem">
+          <button class="btn btn-primary btn-sm" onclick="copyUrl()">Copy</button>
+        </div>
+        <div class="section-title">Share on</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="shareIG()">📸 Instagram bio</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareTG()">✈️ Telegram</button>
+          <button class="btn btn-ghost btn-sm" onclick="shareTwitter()">🐦 Twitter/X</button>
+        </div>
+        <div class="divider"></div>
+        <div class="section-title">QR Code</div>
+        <div id="qr-wrap" style="background:white;padding:16px;border-radius:12px;display:inline-block">
+          <canvas id="qr-canvas" width="160" height="160"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dash-main -->
+</div>
+
+<!-- ═══════════════ PUBLIC PAGE ═══════════════ -->
+<div id="screen-public" class="screen" style="justify-content:center;align-items:center;flex-direction:column">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Mobile menu button -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()" id="mob-btn">☰</button>
+
+<script>
+// ════════════════════════════════════════════════
+//  CONFIG — замени на свои Supabase данные
+// ════════════════════════════════════════════════
+const SUPABASE_URL = 'https://uekuomzrwhukbkxbeolv.supabase.co';
+const SUPABASE_KEY = 'sb_secret_k3J1vMiXZfhmLd1B_LOaNA_TrFiNeqf';
+const APP_URL      = window.location.origin;
+
+// ════════════════════════════════════════════════
+//  SUPABASE INIT
+// ════════════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let userProfile = null;
+
+// ════════════════════════════════════════════════
+//  THEMES
+// ════════════════════════════════════════════════
+const THEMES = [
+  {id:'dark',    label:'Dark',    bg:'#0a0a0f', card:'#1a1a24', text:'#f0eeff', acc:'#7c5cfc'},
+  {id:'cream',   label:'Cream',   bg:'#f5f0eb', card:'#fff',    text:'#1a1614', acc:'#c9856a'},
+  {id:'midnight',label:'Midnight',bg:'#0a0f1a', card:'#0f1a2e', text:'#e0f0ff', acc:'#3b82f6'},
+  {id:'rose',    label:'Rose',    bg:'#1a0a10', card:'#2a0f18', text:'#ffe0ea', acc:'#f472b6'},
+  {id:'forest',  label:'Forest',  bg:'#0a120a', card:'#0f1c0f', text:'#e0f5e0', acc:'#4ade80'},
+  {id:'gold',    label:'Gold',    bg:'#0f0c00', card:'#1c1600', text:'#fff8e0', acc:'#fbbf24'},
+  {id:'slate',   label:'Slate',   bg:'#0f1015', card:'#181b22', text:'#e8eaf0', acc:'#94a3b8'},
+  {id:'sunset',  label:'Sunset',  bg:'#150a00', card:'#220f00', text:'#fff0e0', acc:'#fb923c'},
+];
+
+// ════════════════════════════════════════════════
+//  ROUTING — check URL for /u/username
+// ════════════════════════════════════════════════
+async function init() {
+  const path = window.location.pathname;
+  const match = path.match(/^\/u\/([a-z0-9_]+)/i);
+  if (match) {
+    await showPublicPage(match[1]);
+    return;
+  }
+
+  // Check auth
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadDashboard();
+  } else {
+    showScreen('landing');
+  }
+
+  // Render themes
+  renderThemes();
+
+  // Listen for profile changes
+  document.getElementById('p-name').addEventListener('input', updatePreview);
+  document.getElementById('p-bio').addEventListener('input', updatePreview);
+  document.getElementById('p-avatar').addEventListener('input', updatePreview);
+}
+
+// ════════════════════════════════════════════════
+//  SCREENS
+// ════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('mob-btn').style.display = name === 'dashboard' ? '' : 'none';
+}
+
+function showAuth(tab) {
+  showScreen('auth');
+  switchTab(tab);
+}
+
+function switchTab(tab) {
+  document.getElementById('form-signup').style.display = tab === 'signup' ? '' : 'none';
+  document.getElementById('form-login').style.display  = tab === 'login'  ? '' : 'none';
+  document.getElementById('tab-signup').className = 'auth-tab' + (tab==='signup'?' active':'');
+  document.getElementById('tab-login').className  = 'auth-tab' + (tab==='login' ?' active':'');
+  document.getElementById('auth-subtitle').textContent = tab === 'signup' ? 'Create your free account' : 'Welcome back';
+  document.getElementById('auth-err').style.display = 'none';
+}
+
+// ════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════
+async function doSignup() {
+  const username = document.getElementById('su-username').value.trim();
+  const email    = document.getElementById('su-email').value.trim();
+  const password = document.getElementById('su-password').value;
+
+  if (!username || !email || !password) return showErr('Fill all fields');
+  if (username.length < 3) return showErr('Username must be at least 3 characters');
+  if (password.length < 6) return showErr('Password must be at least 6 characters');
+
+  // Check username taken
+  const { data: existing } = await sb.from('profiles').select('id').eq('username', username).maybeSingle();
+  if (existing) return showErr('Username already taken, try another');
+
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) return showErr(error.message);
+
+  currentUser = data.user;
+
+  // Create profile
+  await sb.from('profiles').insert({
+    id: currentUser.id,
+    username,
+    name: username,
+    bio: '',
+    avatar: '✨',
+    theme: 'dark',
+    links: [],
+  });
+
+  await loadDashboard();
+}
+
+async function doLogin() {
+  const email    = document.getElementById('li-email').value.trim();
+  const password = document.getElementById('li-password').value;
+  if (!email || !password) return showErr('Fill all fields');
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) return showErr(error.message);
+  currentUser = data.user;
+  await loadDashboard();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  userProfile = null;
+  showScreen('landing');
+}
+
+function showErr(msg) {
+  const el = document.getElementById('auth-err');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+async function loadDashboard() {
+  showScreen('dashboard');
+
+  // Load profile
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  userProfile = profile;
+
+  if (profile) {
+    // Sidebar
+    document.getElementById('sidebar-avatar').textContent = profile.avatar || '✨';
+    document.getElementById('sidebar-name').textContent   = profile.name || profile.username;
+    document.getElementById('sidebar-handle').textContent = '@' + profile.username;
+
+    // Profile form
+    document.getElementById('p-name').value     = profile.name || '';
+    document.getElementById('p-username').value = profile.username || '';
+    document.getElementById('p-bio').value      = profile.bio || '';
+    document.getElementById('p-avatar').value   = profile.avatar || '';
+    updatePreview();
+
+    // Select theme
+    document.querySelectorAll('.theme-opt').forEach(el => {
+      el.classList.toggle('selected', el.dataset.id === (profile.theme || 'dark'));
+    });
+
+    // Share URL
+    const url = `${APP_URL}/u/${profile.username}`;
+    document.getElementById('share-url').value = url;
+    document.getElementById('preview-link').href = url;
+    generateQR(url);
+
+    // Links
+    renderLinks(profile.links || []);
+  }
+
+  // Load analytics
+  loadAnalytics();
+}
+
+// ════════════════════════════════════════════════
+//  PANELS
+// ════════════════════════════════════════════════
+function showPanel(name) {
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ════════════════════════════════════════════════
+//  LINKS
+// ════════════════════════════════════════════════
+let links = [];
+
+function renderLinks(arr) {
+  links = arr || [];
+  const container = document.getElementById('link-list');
+  if (!links.length) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:0.85rem;text-align:center;padding:20px">No links yet — add your first one!</div>';
+    return;
+  }
+  container.innerHTML = links.map((l,i) => `
+    <div class="link-item fade-in" data-i="${i}">
+      <span class="link-drag">⠿</span>
+      <span class="link-icon-sel" onclick="changeIcon(${i})">${l.icon||'🔗'}</span>
+      <div class="link-details">
+        <input class="link-title-inp" value="${esc(l.title)}" placeholder="Link title" onchange="links[${i}].title=this.value">
+        <input class="link-url-inp"   value="${esc(l.url)}"   placeholder="https://..." onchange="links[${i}].url=this.value">
+      </div>
+      <button class="link-del" onclick="removeLink(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addLink() {
+  links.push({ icon:'🔗', title:'My Link', url:'https://' });
+  renderLinks(links);
+}
+
+function removeLink(i) {
+  links.splice(i, 1);
+  renderLinks(links);
+}
+
+function changeIcon(i) {
+  const icons = ['🔗','🔥','💎','📸','✈️','🎵','🛒','🌐','💼','❤️','⭐','🎬','📱','🎮','📧','🌸'];
+  const cur = icons.indexOf(links[i].icon);
+  links[i].icon = icons[(cur+1) % icons.length];
+  renderLinks(links);
+}
+
+async function saveLinks() {
+  if (!userProfile) return;
+  const { error } = await sb.from('profiles').update({ links }).eq('id', currentUser.id);
+  if (error) return toast('❌ Error saving links');
+  userProfile.links = links;
+  toast('✅ Links saved!');
+}
+
+// ════════════════════════════════════════════════
+//  PROFILE
+// ════════════════════════════════════════════════
+function renderThemes() {
+  document.getElementById('theme-grid').innerHTML = THEMES.map(t => `
+    <div class="theme-opt" data-id="${t.id}" title="${t.label}"
+         style="background:${t.bg};border-bottom:3px solid ${t.acc}"
+         onclick="selectTheme('${t.id}')">
+    </div>`).join('');
+}
+
+function selectTheme(id) {
+  document.querySelectorAll('.theme-opt').forEach(el => el.classList.toggle('selected', el.dataset.id === id));
+}
+
+function getSelectedTheme() {
+  const sel = document.querySelector('.theme-opt.selected');
+  return sel ? sel.dataset.id : 'dark';
+}
+
+async function saveProfile() {
+  const name     = document.getElementById('p-name').value.trim();
+  const username = document.getElementById('p-username').value.trim();
+  const bio      = document.getElementById('p-bio').value.trim();
+  const avatar   = document.getElementById('p-avatar').value.trim() || '✨';
+  const theme    = getSelectedTheme();
+
+  if (!username) return toast('❌ Username is required');
+
+  // Check username conflict
+  if (username !== userProfile.username) {
+    const { data: ex } = await sb.from('profiles').select('id').eq('username', username).maybeSingle();
+    if (ex) return toast('❌ Username already taken');
+  }
+
+  const { error } = await sb.from('profiles').update({ name, username, bio, avatar, theme }).eq('id', currentUser.id);
+  if (error) return toast('❌ ' + error.message);
+
+  userProfile = { ...userProfile, name, username, bio, avatar, theme };
+  document.getElementById('sidebar-avatar').textContent = avatar;
+  document.getElementById('sidebar-name').textContent   = name || username;
+  document.getElementById('sidebar-handle').textContent = '@' + username;
+
+  const url = `${APP_URL}/u/${username}`;
+  document.getElementById('share-url').value = url;
+  document.getElementById('preview-link').href = url;
+  generateQR(url);
+
+  toast('✅ Profile saved!');
+}
+
+function updatePreview() {
+  document.getElementById('prev-name').textContent   = document.getElementById('p-name').value  || 'Your Name';
+  document.getElementById('prev-bio').textContent    = document.getElementById('p-bio').value   || 'Your bio here';
+  document.getElementById('prev-avatar').textContent = document.getElementById('p-avatar').value || '✨';
+}
+
+// ════════════════════════════════════════════════
+//  ANALYTICS
+// ════════════════════════════════════════════════
+async function loadAnalytics() {
+  if (!userProfile) return;
+  const uid = currentUser.id;
+
+  const today = new Date().toISOString().slice(0,10);
+
+  const [
+    { count: totalVisits },
+    { count: todayVisits },
+    { data: clickData },
+    { data: countryData },
+    { data: events },
+  ] = await Promise.all([
+    sb.from('events').select('*',{count:'exact',head:true}).eq('user_id',uid).eq('event','visit'),
+    sb.from('events').select('*',{count:'exact',head:true}).eq('user_id',uid).eq('event','visit').gte('created_at',today),
+    sb.from('events').select('button').eq('user_id',uid).eq('event','click').not('button','is',null),
+    sb.from('events').select('country').eq('user_id',uid).eq('event','visit'),
+    sb.from('events').select('*').eq('user_id',uid).order('created_at',{ascending:false}).limit(50),
+  ]);
+
+  const totalClicks = clickData?.length || 0;
+  const conv = totalVisits ? Math.round(totalClicks/totalVisits*100) : 0;
+
+  // KPI
+  for (const id of ['ov-visits','an-visits']) { const el=document.getElementById(id); if(el) el.textContent=fmt(totalVisits||0); }
+  for (const id of ['ov-today','an-today'])   { const el=document.getElementById(id); if(el) el.textContent=fmt(todayVisits||0); }
+  for (const id of ['ov-clicks','an-clicks']) { const el=document.getElementById(id); if(el) el.textContent=fmt(totalClicks); }
+  const convEl = document.getElementById('ov-conv'); if(convEl) convEl.textContent = conv+'%';
+
+  // Countries
+  const countries = {};
+  (countryData||[]).forEach(r => { if(r.country) countries[r.country] = (countries[r.country]||0)+1; });
+  const sortedC = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxC = sortedC[0]?.[1] || 1;
+
+  document.getElementById('an-countries').textContent = Object.keys(countries).length;
+
+  const countryHTML = sortedC.length ? sortedC.map(([cc,n]) =>
+    `<div class="crow">${flagOf(cc)} <span style="flex:1;font-size:0.82rem">${cc}</span>
+     <div class="cbar-w"><div class="cbar" style="width:${Math.round(n/maxC*100)}%"></div></div>
+     <span class="cnum">${n}</span></div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">No visits yet</div>';
+
+  for(const id of ['ov-countries','an-country-list']){
+    const el=document.getElementById(id); if(el) el.innerHTML=countryHTML;
+  }
+
+  // Clicks by link
+  const clickMap = {};
+  (clickData||[]).forEach(r => { if(r.button) clickMap[r.button]=(clickMap[r.button]||0)+1; });
+  const sortedClk = Object.entries(clickMap).sort((a,b)=>b[1]-a[1]);
+  const clickHTML = sortedClk.length ? sortedClk.map(([btn,n]) =>
+    `<div class="crow" style="margin-bottom:6px">
+      <span style="flex:1;font-size:0.82rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${esc(btn)}</span>
+      <span style="color:var(--acc);font-size:0.82rem;margin-left:8px">${n}</span>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:0.82rem">No clicks yet</div>';
+  for(const id of ['ov-top-links','an-clicks-list']){
+    const el=document.getElementById(id); if(el) el.innerHTML=clickHTML;
+  }
+
+  // Events
+  const FLAGS2 = {US:'🇺🇸',GB:'🇬🇧',UA:'🇺🇦',RU:'🇷🇺',DE:'🇩🇪',FR:'🇫🇷',PL:'🇵🇱',IT:'🇮🇹',ES:'🇪🇸',BR:'🇧🇷',CA:'🇨🇦',AU:'🇦🇺',TR:'🇹🇷',AE:'🇦🇪',KZ:'🇰🇿',NL:'🇳🇱',SE:'🇸🇪'};
+  const evEl = document.getElementById('an-events');
+  if(evEl) evEl.innerHTML = (events||[]).map(e => `
+    <div class="erow">
+      <span style="color:var(--muted);font-size:0.72rem;font-family:monospace;white-space:nowrap">${relTime(e.created_at)}</span>
+      <span class="badge ${e.event==='click'?'badge-acc':'badge-green'}">${e.event}</span>
+      <span style="font-size:0.78rem">${FLAGS2[e.country]||'🌐'} ${e.country||'—'}</span>
+      <span style="color:var(--muted);font-size:0.78rem">${e.device||'—'}</span>
+      ${e.button?`<span style="color:var(--acc3);font-size:0.78rem">${esc(e.button)}</span>`:''}
+    </div>`).join('') || '<div style="color:var(--muted);font-size:0.82rem;padding:12px">No events yet</div>';
+}
+
+// ════════════════════════════════════════════════
+//  PUBLIC PAGE
+// ════════════════════════════════════════════════
+async function showPublicPage(username) {
+  document.getElementById('mob-btn').style.display = 'none';
+  showScreen('public');
+
+  const { data: profile } = await sb.from('profiles').select('*').eq('username', username).maybeSingle();
+  const screen = document.getElementById('screen-public');
+
+  if (!profile) {
+    screen.innerHTML = `<div style="text-align:center;padding:60px 24px">
+      <div style="font-size:3rem;margin-bottom:16px">😢</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.4rem;margin-bottom:8px">Page not found</div>
+      <div style="color:var(--muted);margin-bottom:24px">@${esc(username)} doesn't exist (yet)</div>
+      <a href="/" class="btn btn-primary">Create your own →</a>
+    </div>`;
+    return;
+  }
+
+  const theme = THEMES.find(t=>t.id===profile.theme) || THEMES[0];
+  const links = profile.links || [];
+
+  screen.style.cssText = `background:${theme.bg};min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column`;
+
+  screen.innerHTML = `
+    <div style="width:100%;max-width:420px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;font-family:'DM Sans',sans-serif">
+      <div style="width:88px;height:88px;border-radius:50%;background:${theme.acc}22;border:2px solid ${theme.acc}44;display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin-bottom:4px">
+        ${esc(profile.avatar||'✨')}
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:${theme.text}">${esc(profile.name||profile.username)}</div>
+      <div style="font-size:0.85rem;color:${theme.text}88;text-align:center;max-width:280px;line-height:1.6;margin-bottom:8px">${esc(profile.bio||'')}</div>
+      ${links.map(l=>`
+        <a href="${esc(l.url)}" target="_blank" rel="noopener"
+           style="width:100%;background:${theme.card};border:1px solid ${theme.acc}22;border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;text-decoration:none;color:${theme.text};transition:all 0.15s;font-size:0.9rem"
+           onclick="trackClick('${esc(profile.id)}','${esc(l.title)}')"
+           onmouseover="this.style.borderColor='${theme.acc}66';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.borderColor='${theme.acc}22';this.style.transform=''">
+          <span style="font-size:1.2rem;width:28px;text-align:center;flex-shrink:0">${esc(l.icon||'🔗')}</span>
+          <span style="flex:1;font-weight:500">${esc(l.title)}</span>
+          <span style="opacity:0.4;font-size:0.8rem">→</span>
+        </a>`).join('')}
+      <div style="margin-top:16px;font-size:0.72rem;color:${theme.text}33;letter-spacing:0.08em">
+        made with <a href="/" style="color:${theme.acc};text-decoration:none">Linky ✦</a>
+      </div>
+    </div>`;
+
+  // Track visit
+  trackVisit(profile.id);
+}
+
+async function trackVisit(userId) {
+  const country = 'XX'; // Vercel/Supabase Edge will get real country
+  const ua = navigator.userAgent;
+  const device = /Mobile|Android|iPhone|iPad/i.test(ua) ? 'mobile' : 'desktop';
+  await sb.from('events').insert({ user_id:userId, event:'visit', country, device });
+}
+
+async function trackClick(userId, button) {
+  await sb.from('events').insert({ user_id:userId, event:'click', button, device: /Mobile/i.test(navigator.userAgent)?'mobile':'desktop' });
+}
+
+// ════════════════════════════════════════════════
+//  SHARE
+// ════════════════════════════════════════════════
+function copyUrl() {
+  const url = document.getElementById('share-url').value;
+  navigator.clipboard.writeText(url).then(() => toast('✅ Copied to clipboard!'));
+}
+
+function shareIG()      { toast('📸 Copy this URL and paste it in your Instagram bio settings'); }
+function shareTG()      { window.open('https://t.me/share/url?url='+encodeURIComponent(document.getElementById('share-url').value)); }
+function shareTwitter() { window.open('https://twitter.com/intent/tweet?url='+encodeURIComponent(document.getElementById('share-url').value)+'&text=Check+out+my+links+✨'); }
+
+function generateQR(url) {
+  // Simple QR placeholder (in real app use qrcode.js)
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,160,160);
+  ctx.fillStyle = '#000';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('QR: ' + url.slice(0,30), 80, 80);
+  ctx.fillText('Install qrcode.js for', 80, 92);
+  ctx.fillText('real QR generation', 80, 104);
+}
+
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000)    return (n/1000).toFixed(1)+'k';
+  return String(n||0);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function flagOf(cc) {
+  const FLAGS={US:'🇺🇸',GB:'🇬🇧',UA:'🇺🇦',RU:'🇷🇺',DE:'🇩🇪',FR:'🇫🇷',PL:'🇵🇱',IT:'🇮🇹',ES:'🇪🇸',BR:'🇧🇷',CA:'🇨🇦',AU:'🇦🇺',TR:'🇹🇷',AE:'🇦🇪',KZ:'🇰🇿',NL:'🇳🇱',SE:'🇸🇪',NO:'🇳🇴',FI:'🇫🇮',CZ:'🇨🇿',BY:'🇧🇾'};
+  return FLAGS[cc]||'🌐';
+}
+
+function relTime(ts) {
+  const d = Math.floor((Date.now()-new Date(ts))/1000);
+  if (d < 60)    return d+'s ago';
+  if (d < 3600)  return Math.floor(d/60)+'m ago';
+  if (d < 86400) return Math.floor(d/3600)+'h ago';
+  return new Date(ts).toLocaleDateString();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ════════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
